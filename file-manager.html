@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Task Manager</title>
+  <style>
+    * { box-sizing: border-box; margin:0; padding:0; font-family: sans-serif; }
+    body { background: #f5f5f5; }
+    #toolbar {
+      background: #eee; padding: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    #toolbar button { padding: 6px 12px; cursor: pointer; }
+    #breadcrumb { margin-left: auto; font-weight: bold; }
+
+    /* grid view */
+    #fileView.grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+      gap: 12px; padding: 12px;
+    }
+    /* list view */
+    #fileView.list { padding: 12px; }
+    #fileView.list table {
+      width: 100%; border-collapse: collapse;
+    }
+    #fileView.list th, #fileView.list td {
+      padding: 8px; border-bottom: 1px solid #ddd;
+    }
+    #fileView.list tr:hover { background: #fafafa; }
+
+    /* item common */
+    .item {
+      background: #fff; border: 1px solid #ccc; border-radius: 4px;
+      padding: 8px; text-align: center; cursor: pointer;
+    }
+    .item .icon { font-size: 32px; margin-bottom: 4px; }
+    .item.drag-over { background: #def; }
+  </style>
+</head>
+<body>
+
+  <div id="toolbar">
+    <button id="btnNewFolder">+ 새폴더</button>
+    <button id="btnViewList">리스트</button>
+    <button id="btnViewGrid">앨범</button>
+    <span id="breadcrumb">루트</span>
+  </div>
+
+  <div id="fileView" class="grid"></div>
+
+  <script>
+  (async function(){
+    const items = [];
+    let currentParent = null;
+    let viewMode = 'grid';
+
+    const fileView    = document.getElementById('fileView');
+    const btnNewFldr  = document.getElementById('btnNewFolder');
+    const btnList     = document.getElementById('btnViewList');
+    const btnGrid     = document.getElementById('btnViewGrid');
+    const breadcrumb  = document.getElementById('breadcrumb');
+
+    async function loadItems() {
+      try {
+        const res = await fetch('/api/teacher-items');
+        const data = await res.json();
+        items.splice(0, items.length, ...data);
+      } catch (err) {
+        console.error('Failed to load items. Using defaults.', err);
+        items.splice(0, items.length,
+          { id:1, name:'규칙 목록',   type:'folder', parent:null, created: new Date() },
+          { id:2, name:'문제 목록',   type:'folder', parent:null, created: new Date() },
+          { id:3, name:'업무 목록',   type:'folder', parent:null, created: new Date() }
+        );
+      }
+    }
+
+    function render() {
+      fileView.innerHTML = '';
+      breadcrumb.textContent = currentParent
+        ? items.find(i=>i.id===currentParent)?.name || '루트'
+        : '루트';
+      const viewItems = items.filter(i => i.parent === currentParent);
+
+      if (viewMode === 'grid') {
+        fileView.className = 'grid';
+        viewItems.forEach(i => {
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.draggable = true;
+          div.dataset.id = i.id;
+          div.innerHTML = `
+            <div class="icon">${i.type==='folder'?'📁':'📄'}</div>
+            <div class="name">${i.name}</div>
+          `;
+          attachDnD(div, i);
+          fileView.appendChild(div);
+        });
+      } else {
+        fileView.className = 'list';
+        const table = document.createElement('table');
+        table.innerHTML = '<tr><th>이름</th><th>생성일</th></tr>';
+        viewItems.forEach(i => {
+          const tr = document.createElement('tr');
+          tr.draggable = true;
+          tr.dataset.id = i.id;
+          tr.innerHTML = `
+            <td>${i.type==='folder'?'📁':''} ${i.name}</td>
+            <td>${i.created ? new Date(i.created).toLocaleString() : ''}</td>
+          `;
+          attachDnD(tr, i);
+          table.appendChild(tr);
+        });
+        fileView.appendChild(table);
+      }
+    }
+
+    function attachDnD(el, item) {
+      if (item.type === 'folder') {
+        el.addEventListener('dblclick', ()=> {
+          currentParent = item.id;
+          render();
+        });
+        el.addEventListener('dragover', e=> {
+          e.preventDefault();
+          el.classList.add('drag-over');
+        });
+        el.addEventListener('dragleave', ()=> {
+          el.classList.remove('drag-over');
+        });
+        el.addEventListener('drop', e=> {
+          e.preventDefault();
+          el.classList.remove('drag-over');
+          const dragId = +e.dataTransfer.getData('text/plain');
+          moveItem(dragId, item.id);
+        });
+      }
+      if (item.type === 'file' || item.type==='folder') {
+        el.addEventListener('dragstart', e=>{
+          e.dataTransfer.setData('text/plain', item.id);
+        });
+      }
+    }
+
+    async function moveItem(id, toParent) {
+      const it = items.find(x=>x.id===id);
+      if (!it) return;
+      it.parent = toParent;
+      render();
+      try {
+        await fetch(`/api/teacher-items/${id}`, {
+          method: 'PATCH',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({parent: toParent})
+        });
+      } catch (err) {
+        console.error('Failed to move item', err);
+      }
+    }
+
+    btnNewFldr.addEventListener('click', async ()=>{
+      const name = prompt('새 폴더 이름:');
+      if (!name) return;
+      const newItem = {
+        id: Date.now(),
+        name,
+        type: 'folder',
+        parent: currentParent,
+        created: new Date()
+      };
+      items.push(newItem);
+      render();
+      try {
+        const res = await fetch('/api/teacher-items', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(newItem)
+        });
+        const saved = await res.json();
+        newItem.id = saved.id;
+      } catch (err) {
+        console.error('Failed to save folder', err);
+      }
+    });
+
+    btnList.addEventListener('click', ()=>{ viewMode='list'; render(); });
+    btnGrid.addEventListener('click', ()=>{ viewMode='grid'; render(); });
+
+    await loadItems();
+    render();
+  })();
+  </script>
+</body>
+</html>
