@@ -41,6 +41,9 @@
         .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
         .problem-type-fields { display: none; }
         .btn-disabled { background-color: #D1D5DB; cursor: not-allowed; }
+        .folder-header { cursor: pointer; display: flex; align-items: center; font-weight: 600; margin-bottom: 0.5rem; }
+        .folder-header .icon { margin-right: 0.25rem; }
+        .folder-content.hidden { display: none; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -209,8 +212,13 @@
                         <button id="add-ai-math-problem-btn" class="btn bg-blue-500 hover:bg-blue-600 text-white">🤖 AI 수학 문제 만들기</button>
                     </div>
                 </div>
-                <div id="learning-problem-list" class="bg-white p-4 rounded-lg shadow">
-                    <!-- Learning problems will be rendered here -->
+                <div class="folder">
+                    <div class="folder-header" data-target="learning-problem-list">
+                        <span class="icon">📁</span>학습 문제 폴더
+                    </div>
+                    <div id="learning-problem-list" class="folder-content bg-white p-4 rounded-lg shadow hidden">
+                        <!-- Learning problems will be rendered here -->
+                    </div>
                 </div>
             </div>
             <div id="life-rules-management-tab-content" class="tab-content">
@@ -220,8 +228,13 @@
                         <button id="add-life-rule-btn" class="btn bg-green-500 hover:bg-green-600 text-white">+ 새 규칙 만들기</button>
                     </div>
                 </div>
-                <div id="life-rule-list" class="bg-white p-4 rounded-lg shadow">
-                    <!-- Life rules will be rendered here -->
+                <div class="folder">
+                    <div class="folder-header" data-target="life-rule-list">
+                        <span class="icon">📁</span>생활 규칙 폴더
+                    </div>
+                    <div id="life-rule-list" class="folder-content bg-white p-4 rounded-lg shadow hidden">
+                        <!-- Life rules will be rendered here -->
+                    </div>
                 </div>
             </div>
             <div id="work-management-tab-content" class="tab-content">
@@ -232,8 +245,13 @@
                         <button id="open-file-manager-btn" class="btn btn-secondary">파일 관리</button>
                     </div>
                 </div>
-                <div id="work-doc-list" class="bg-white p-4 rounded-lg shadow">
-                    <p class="text-center text-gray-500">작성된 문서가 없습니다.</p>
+                <div class="folder">
+                    <div class="folder-header" data-target="work-doc-list">
+                        <span class="icon">📁</span>업무 문서 폴더
+                    </div>
+                    <div id="work-doc-list" class="folder-content bg-white p-4 rounded-lg shadow hidden">
+                        <p class="text-center text-gray-500">작성된 문서가 없습니다.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2524,7 +2542,10 @@
         document.getElementById('open-draft-modal-btn').addEventListener('click', () => openDraftModal());
         const fileManagerBtn = document.getElementById('open-file-manager-btn');
         if (fileManagerBtn) {
-            fileManagerBtn.addEventListener('click', () => window.open('file-manager.html', '_blank'));
+            fileManagerBtn.addEventListener('click', () => {
+                const header = document.querySelector('.folder-header[data-target="work-doc-list"]');
+                if (header) header.click();
+            });
         }
 
         function openDraftModal(index = null) {
@@ -3205,6 +3226,15 @@
         document.getElementById('close-manual-problem-creation-modal-btn').addEventListener('click', () => manualProblemCreationModal.style.display = 'none');
         document.getElementById('close-manual-problem-modal-btn').addEventListener('click', () => manualProblemModal.style.display = 'none');
 
+        // Folder toggling for teacher file sections
+        document.querySelectorAll('.folder-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const content = document.getElementById(header.dataset.target);
+                if (content) {
+                    content.classList.toggle('hidden');
+                }
+            });
+        });
 
         // --- Initial Load ---
         initializeAuthentication();
