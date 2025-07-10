@@ -122,6 +122,7 @@
                     <button data-tab="life-rules-management" id="life-rules-management-dashboard-tab" class="dashboard-tab py-4 px-1 border-b-2 font-medium text-sm hidden">생활 규칙 관리</button>
                     <button data-tab="learning-problems" id="learning-problems-dashboard-tab" class="dashboard-tab py-4 px-1 border-b-2 font-medium text-sm hidden">학습 문제 관리</button>
                     <button data-tab="work-management" id="work-management-tab" class="dashboard-tab py-4 px-1 border-b-2 font-medium text-sm hidden">업무 관리</button>
+                    <button data-tab="language-plan" id="language-plan-tab" class="dashboard-tab py-4 px-1 border-b-2 font-medium text-sm hidden">개별어 계획</button>
                 </nav>
             </div>
 
@@ -231,6 +232,15 @@
                 </div>
                 <div id="work-doc-list" class="bg-white p-4 rounded-lg shadow">
                     <p class="text-center text-gray-500">작성된 문서가 없습니다.</p>
+                </div>
+            </div>
+            <div id="language-plan-tab-content" class="tab-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">🗒️ 개별어 교육 계획</h2>
+                    <button id="add-language-student-btn" class="btn btn-primary">+ 학생 추가</button>
+                </div>
+                <div id="language-student-list" class="bg-white p-4 rounded-lg shadow">
+                    <!-- Student list will be rendered here -->
                 </div>
             </div>
         </div>
@@ -632,6 +642,119 @@
         </div>
     </div>
 
+    <!-- Language Plan Modals -->
+    <div id="language-student-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <span class="close-button" id="close-language-student-modal-btn">&times;</span>
+            <h3 class="text-xl font-bold mb-4">학생 정보</h3>
+            <form id="language-student-form" class="text-left space-y-3">
+                <input type="hidden" id="ls-student-id">
+                <div>
+                    <label for="ls-name" class="block text-sm font-medium">이름</label>
+                    <input type="text" id="ls-name" required class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="ls-birthdate" class="block text-sm font-medium">생년월일</label>
+                    <input type="date" id="ls-birthdate" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="ls-address" class="block text-sm font-medium">주소</label>
+                    <input type="text" id="ls-address" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="ls-features" class="block text-sm font-medium">학생 특성</label>
+                    <textarea id="ls-features" rows="2" class="w-full p-2 border rounded-md form-input"></textarea>
+                </div>
+                <div>
+                    <label for="ls-services" class="block text-sm font-medium">특수교육 서비스</label>
+                    <textarea id="ls-services" rows="2" class="w-full p-2 border rounded-md form-input"></textarea>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="language-plan-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-content-lg">
+            <span class="close-button" id="close-language-plan-modal-btn">&times;</span>
+            <h3 class="text-xl font-bold mb-4">개별어 교육 계획</h3>
+            <div id="language-plan-list" class="space-y-2 mb-4 text-sm"></div>
+            <form id="language-plan-form" class="text-left space-y-3">
+                <input type="hidden" id="lp-student-id">
+                <input type="hidden" id="lp-plan-id">
+                <div>
+                    <label for="lp-goal" class="block text-sm font-medium">학기 목표</label>
+                    <textarea id="lp-goal" rows="2" class="w-full p-2 border rounded-md form-input"></textarea>
+                </div>
+                <div>
+                    <label for="lp-curriculum" class="block text-sm font-medium">적용 교육과정</label>
+                    <input type="text" id="lp-curriculum" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="lp-grade-group" class="block text-sm font-medium">학년군</label>
+                    <input type="text" id="lp-grade-group" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="lp-subject" class="block text-sm font-medium">과목</label>
+                    <input type="text" id="lp-subject" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="lp-unit" class="block text-sm font-medium">단원</label>
+                    <input type="text" id="lp-unit" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="lp-content" class="block text-sm font-medium">교육 내용</label>
+                    <textarea id="lp-content" rows="2" class="w-full p-2 border rounded-md form-input"></textarea>
+                </div>
+                <div class="flex justify-between">
+                    <button type="button" id="lp-ai-generate" class="btn bg-purple-500 hover:bg-purple-600 text-white">AI 생성</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="language-eval-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <span class="close-button" id="close-language-eval-modal-btn">&times;</span>
+            <h3 class="text-xl font-bold mb-4">평가 작성</h3>
+            <form id="language-eval-form" class="text-left space-y-3">
+                <input type="hidden" id="eval-student-id">
+                <input type="hidden" id="eval-plan-id">
+                <div>
+                    <label for="eval-subject" class="block text-sm font-medium">과목</label>
+                    <input type="text" id="eval-subject" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="eval-unit" class="block text-sm font-medium">단원</label>
+                    <input type="text" id="eval-unit" class="w-full p-2 border rounded-md form-input">
+                </div>
+                <div>
+                    <label for="eval-content" class="block text-sm font-medium">교육 내용</label>
+                    <textarea id="eval-content" rows="2" class="w-full p-2 border rounded-md form-input"></textarea>
+                </div>
+                <div>
+                    <label for="eval-student-level" class="block text-sm font-medium">학생 수준</label>
+                    <textarea id="eval-student-level" rows="2" class="w-full p-2 border rounded-md form-input"></textarea>
+                </div>
+                <div>
+                    <label for="eval-rating" class="block text-sm font-medium">평가</label>
+                    <select id="eval-rating" class="w-full p-2 border rounded-md form-input">
+                        <option value="상">상</option>
+                        <option value="중">중</option>
+                        <option value="하">하</option>
+                    </select>
+                </div>
+                <div class="flex justify-between">
+                    <button type="button" id="eval-ai-generate" class="btn bg-purple-500 hover:bg-purple-600 text-white">AI 학생 수준</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script type="module">
         /*
@@ -776,6 +899,9 @@
         const manualProblemCreationModal = document.getElementById('manual-problem-creation-modal');
         const manualProblemModal = document.getElementById('manual-problem-modal');
         const draftModal = document.getElementById('draft-modal');
+        const languageStudentModal = document.getElementById('language-student-modal');
+        const languagePlanModal = document.getElementById('language-plan-modal');
+        const languageEvalModal = document.getElementById('language-eval-modal');
         let studentToAdjustId = null;
 
 
@@ -916,6 +1042,7 @@
             document.getElementById('learning-problems-dashboard-tab').style.display = currentUserData.role === 'teacher' ? 'inline-block' : 'none';
             document.getElementById('life-rules-management-dashboard-tab').style.display = currentUserData.role === 'teacher' ? 'inline-block' : 'none';
             document.getElementById('work-management-tab').style.display = currentUserData.role === 'teacher' ? 'inline-block' : 'none';
+            document.getElementById('language-plan-tab').style.display = currentUserData.role === 'teacher' ? 'inline-block' : 'none';
             document.getElementById('teacher-admin-panel').style.display = currentUserData.role === 'teacher' ? 'block' : 'none';
             
             // Disable interactive elements if admin is viewing
@@ -950,6 +1077,7 @@
                 loadLearningProblems();
                 loadLifeRules();
                 loadWorkDocs();
+                loadLanguageStudents();
             }
             startStockUpdates();
             document.getElementById('teacher-add-shop-item-btn').classList.toggle('hidden', currentUserData.role !== 'teacher');
@@ -3188,6 +3316,229 @@
             });
         }
 
+        // --- Language Plan Functions ---
+        async function loadLanguageStudents() {
+            const container = document.getElementById('language-student-list');
+            container.innerHTML = '<p class="text-center text-gray-500">학생 목록을 불러오는 중입니다...</p>';
+            try {
+                const q = query(collection(db, 'virtualStudents'), where('teacherId', '==', currentUserData.id));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    container.innerHTML = '<p class="text-center text-gray-500">등록된 학생이 없습니다.</p>';
+                    return;
+                }
+                const students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                container.innerHTML = students.map(s => `
+                    <div class="p-2 flex justify-between items-center border-b">
+                        <div>
+                            <p class="font-semibold">${s.name}</p>
+                            <p class="text-xs text-gray-500">${s.birthDate || ''}</p>
+                        </div>
+                        <div class="space-x-1">
+                            <button class="edit-language-student-btn btn bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-2 py-1" data-id="${s.id}">수정</button>
+                            <button class="open-language-plan-btn btn bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1" data-id="${s.id}">계획</button>
+                            <button class="delete-language-student-btn btn bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1" data-id="${s.id}">삭제</button>
+                        </div>
+                    </div>
+                `).join('');
+                container.querySelectorAll('.edit-language-student-btn').forEach(btn => btn.addEventListener('click', () => openLanguageStudentModal(btn.dataset.id)));
+                container.querySelectorAll('.delete-language-student-btn').forEach(btn => btn.addEventListener('click', () => deleteLanguageStudent(btn.dataset.id)));
+                container.querySelectorAll('.open-language-plan-btn').forEach(btn => btn.addEventListener('click', () => openLanguagePlanModal(btn.dataset.id)));
+            } catch (e) {
+                console.error('Error loading students:', e);
+                container.innerHTML = '<p class="text-center text-red-500">학생 목록 로드 실패</p>';
+            }
+        }
+
+        function openLanguageStudentModal(id = '') {
+            languageStudentModal.style.display = 'flex';
+            const form = document.getElementById('language-student-form');
+            form.reset();
+            form.querySelector('#ls-student-id').value = id;
+            if (!id) return;
+            getDoc(doc(db, 'virtualStudents', id)).then(snap => {
+                if (snap.exists()) {
+                    const d = snap.data();
+                    form.querySelector('#ls-name').value = d.name || '';
+                    form.querySelector('#ls-birthdate').value = d.birthDate || '';
+                    form.querySelector('#ls-address').value = d.address || '';
+                    form.querySelector('#ls-features').value = d.features || '';
+                    form.querySelector('#ls-services').value = d.services || '';
+                }
+            });
+        }
+
+        document.getElementById('language-student-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const id = form.querySelector('#ls-student-id').value;
+            const data = {
+                teacherId: currentUserData.id,
+                name: form.querySelector('#ls-name').value,
+                birthDate: form.querySelector('#ls-birthdate').value,
+                address: form.querySelector('#ls-address').value,
+                features: form.querySelector('#ls-features').value,
+                services: form.querySelector('#ls-services').value
+            };
+            try {
+                if (id) {
+                    await setDoc(doc(db, 'virtualStudents', id), data, { merge: true });
+                } else {
+                    await addDoc(collection(db, 'virtualStudents'), { ...data, createdAt: serverTimestamp() });
+                }
+                languageStudentModal.style.display = 'none';
+                loadLanguageStudents();
+            } catch (error) {
+                showModal('오류', `저장 실패: ${error.message}`);
+            }
+        });
+
+        async function deleteLanguageStudent(id) {
+            showModal('삭제 확인', '정말로 이 학생을 삭제하시겠습니까?', async () => {
+                try {
+                    await deleteDoc(doc(db, 'virtualStudents', id));
+                    modal.style.display = 'none';
+                    loadLanguageStudents();
+                } catch (error) {
+                    showModal('오류', `삭제 중 오류: ${error.message}`);
+                }
+            });
+        }
+
+        async function openLanguagePlanModal(studentId) {
+            languagePlanModal.style.display = 'flex';
+            document.getElementById('lp-student-id').value = studentId;
+            document.getElementById('lp-plan-id').value = '';
+            document.getElementById('language-plan-form').reset();
+            loadLanguagePlanList(studentId);
+        }
+
+        async function loadLanguagePlanList(studentId) {
+            const container = document.getElementById('language-plan-list');
+            container.innerHTML = '<p class="text-sm text-gray-500">계획을 불러오는 중...</p>';
+            const qSnap = await getDocs(collection(db, `virtualStudents/${studentId}/languagePlans`));
+            if (qSnap.empty) {
+                container.innerHTML = '<p class="text-sm text-gray-500">등록된 계획이 없습니다.</p>';
+                return;
+            }
+            container.innerHTML = qSnap.docs.map(docSnap => {
+                const p = docSnap.data();
+                return `<div class="flex justify-between items-center border p-2 rounded">
+                            <div>
+                                <p class="font-semibold">${p.subject || ''} - ${p.unit || ''}</p>
+                                <p class="text-xs text-gray-500">${p.goal || ''}</p>
+                            </div>
+                            <div class="space-x-1">
+                                <button class="edit-plan-btn btn bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-2 py-1" data-id="${docSnap.id}" data-st="${studentId}">수정</button>
+                                <button class="add-eval-btn btn bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1" data-id="${docSnap.id}" data-st="${studentId}">평가</button>
+                                <button class="delete-plan-btn btn bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1" data-id="${docSnap.id}" data-st="${studentId}">삭제</button>
+                            </div>
+                        </div>`;
+            }).join('');
+            container.querySelectorAll('.edit-plan-btn').forEach(btn => btn.addEventListener('click', () => editLanguagePlan(btn.dataset.st, btn.dataset.id)));
+            container.querySelectorAll('.delete-plan-btn').forEach(btn => btn.addEventListener('click', () => deleteLanguagePlan(btn.dataset.st, btn.dataset.id)));
+            container.querySelectorAll('.add-eval-btn').forEach(btn => btn.addEventListener('click', () => openLanguageEvalModal(btn.dataset.st, btn.dataset.id)));
+        }
+
+        async function editLanguagePlan(studentId, planId) {
+            const snap = await getDoc(doc(db, `virtualStudents/${studentId}/languagePlans`, planId));
+            if (!snap.exists()) return;
+            const p = snap.data();
+            document.getElementById('lp-student-id').value = studentId;
+            document.getElementById('lp-plan-id').value = planId;
+            document.getElementById('lp-goal').value = p.goal || '';
+            document.getElementById('lp-curriculum').value = p.curriculum || '';
+            document.getElementById('lp-grade-group').value = p.gradeGroup || '';
+            document.getElementById('lp-subject').value = p.subject || '';
+            document.getElementById('lp-unit').value = p.unit || '';
+            document.getElementById('lp-content').value = p.content || '';
+        }
+
+        document.getElementById('language-plan-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const studentId = form.querySelector('#lp-student-id').value;
+            const planId = form.querySelector('#lp-plan-id').value;
+            const data = {
+                goal: form.querySelector('#lp-goal').value,
+                curriculum: form.querySelector('#lp-curriculum').value,
+                gradeGroup: form.querySelector('#lp-grade-group').value,
+                subject: form.querySelector('#lp-subject').value,
+                unit: form.querySelector('#lp-unit').value,
+                content: form.querySelector('#lp-content').value
+            };
+            try {
+                if (planId) {
+                    await setDoc(doc(db, `virtualStudents/${studentId}/languagePlans`, planId), data, { merge: true });
+                } else {
+                    await addDoc(collection(db, `virtualStudents/${studentId}/languagePlans`), { ...data, createdAt: serverTimestamp() });
+                }
+                loadLanguagePlanList(studentId);
+                form.reset();
+                document.getElementById('lp-plan-id').value = '';
+            } catch (error) {
+                showModal('오류', `저장 실패: ${error.message}`);
+            }
+        });
+
+        async function deleteLanguagePlan(studentId, planId) {
+            showModal('삭제 확인', '정말로 이 계획을 삭제하시겠습니까?', async () => {
+                try {
+                    await deleteDoc(doc(db, `virtualStudents/${studentId}/languagePlans`, planId));
+                    modal.style.display = 'none';
+                    loadLanguagePlanList(studentId);
+                } catch (error) {
+                    showModal('오류', `삭제 중 오류: ${error.message}`);
+                }
+            });
+        }
+
+        document.getElementById('lp-ai-generate').addEventListener('click', () => {
+            const subj = document.getElementById('lp-subject').value;
+            const unit = document.getElementById('lp-unit').value;
+            document.getElementById('lp-content').value = `${subj} 과목 ${unit} 단원을 중심으로 학습합니다.`;
+        });
+
+        function openLanguageEvalModal(studentId, planId) {
+            languageEvalModal.style.display = 'flex';
+            const form = document.getElementById('language-eval-form');
+            form.reset();
+            form.querySelector('#eval-student-id').value = studentId;
+            form.querySelector('#eval-plan-id').value = planId;
+        }
+
+        document.getElementById('language-eval-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const studentId = form.querySelector('#eval-student-id').value;
+            const planId = form.querySelector('#eval-plan-id').value;
+            const data = {
+                subject: form.querySelector('#eval-subject').value,
+                unit: form.querySelector('#eval-unit').value,
+                content: form.querySelector('#eval-content').value,
+                studentLevel: form.querySelector('#eval-student-level').value,
+                rating: form.querySelector('#eval-rating').value,
+                createdAt: serverTimestamp()
+            };
+            try {
+                await addDoc(collection(db, `virtualStudents/${studentId}/languagePlans/${planId}/evaluations`), data);
+                languageEvalModal.style.display = 'none';
+            } catch (error) {
+                showModal('오류', `저장 실패: ${error.message}`);
+            }
+        });
+
+        document.getElementById('eval-ai-generate').addEventListener('click', () => {
+            const rating = document.getElementById('eval-rating').value;
+            const subject = document.getElementById('eval-subject').value;
+            const unit = document.getElementById('eval-unit').value;
+            let desc = '추가적인 연습이 필요합니다.';
+            if (rating === '상') desc = '우수한 성취를 보이고 있습니다.';
+            else if (rating === '중') desc = '기본 개념을 이해하고 있습니다.';
+            document.getElementById('eval-student-level').value = `${subject} ${unit} 단원에서 ${desc}`;
+        });
+
+
         // Close Modals
         document.getElementById('close-homework-modal-btn').addEventListener('click', () => homeworkModal.style.display = 'none');
         document.getElementById('close-problem-creation-modal-btn').addEventListener('click', () => problemCreationModal.style.display = 'none');
@@ -3197,6 +3548,12 @@
         document.getElementById('close-dictation-modal-btn').addEventListener('click', () => dictationModal.style.display = 'none');
         document.getElementById('close-manual-problem-creation-modal-btn').addEventListener('click', () => manualProblemCreationModal.style.display = 'none');
         document.getElementById('close-manual-problem-modal-btn').addEventListener('click', () => manualProblemModal.style.display = 'none');
+        document.getElementById('close-language-student-modal-btn').addEventListener('click', () => languageStudentModal.style.display = 'none');
+        document.getElementById('close-language-plan-modal-btn').addEventListener('click', () => languagePlanModal.style.display = 'none');
+        document.getElementById('close-language-eval-modal-btn').addEventListener('click', () => languageEvalModal.style.display = 'none');
+
+        document.getElementById('add-language-student-btn').addEventListener('click', () => openLanguageStudentModal());
+        document.getElementById('language-plan-tab').addEventListener('click', loadLanguageStudents);
 
 
         // --- Initial Load ---
